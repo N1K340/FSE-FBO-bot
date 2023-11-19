@@ -3,7 +3,8 @@
 """
 Python script to monitor for notifications JSON file output by FSE FBO operations
 - Check every minute if JSON has a new notification
-- Post to specified discord chanel 
+- Post to specified discord channel
+- Resave JSON file minus disseminated messages
 - Output logs to '../logs/discordbot.log
 
 Configuration required in file 'fsefbo.config'

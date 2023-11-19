@@ -3,9 +3,9 @@
 """
 Python script to monitor FSE FBO operations
 - Check FBO has more than X days of supplies on hand
-- Check FBO which sells JetA has minimum ammount on hand (Fuel price > $1)
-- Check FBO which sells Avgas has minimum ammount on hand (Fuel price > $1)
-- Output results to JSON for a discord bot to diseminate
+- Check FBO which sells JetA has minimum amount on hand (Fuel price > $1)
+- Check FBO which sells Avgas has minimum amount on hand (Fuel price > $1)
+- Output results to JSON for a discord bot to disseminate
 - Output results to '../logs/fsefbo.log'
 
 Configuration required in file 'fsefboconfig.py'
