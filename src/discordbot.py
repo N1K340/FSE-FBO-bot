@@ -12,7 +12,7 @@ Configuration required in file 'fsefbo.config'
 
 
 import discord
-import fsefboconfigreal as cfg
+import fsefboconfig as cfg
 import json
 import asyncio
 import logging
@@ -27,7 +27,7 @@ if not os.path.exists(f"{os.path.dirname(__file__)}/logs/"):
 logging.basicConfig(
     filename=f"{os.path.dirname(__file__)}/logs/discordbot.log",
     format="%(asctime)s:%(message)s",
-    level=logging.INFO
+    level=logging.INFO,
 )
 
 intents = discord.Intents.default()
@@ -35,9 +35,10 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
+
 async def send_notification(
     notification,
-):  # this method is tested and works when called from same file
+):
     for guild in client.guilds:
         for channel in guild.text_channels:
             if channel.name == cfg.disco_channel:
@@ -54,24 +55,28 @@ async def update_notifications():
     while True:
         try:
             script_dir = Path(__file__).resolve().parent
-            file_path = script_dir / cfg.filename
+            file_path = script_dir / cfg.jsonfile
             logger.info(f"\nChecking '{file_path}' for new messages.")
 
             with open(file_path, "r") as file:  # extract all content from json file
                 content = json.load(file)
-            while len(content["notifications"]) > 0:  # send all notifications one by one
+            while (
+                len(content["notifications"]) > 0
+            ):  # send all notifications one by one
                 await send_notification(content["notifications"][0])
                 content["notifications"].pop(0)
-            with open(
-                "disco_msg.json", "w"
-            ) as file:  # write the now empty content back to json file
+            with open(file_path, "w") as file: # write ammended data to json
                 json.dump(content, file, indent=4)
-            await asyncio.sleep(60)
         except FileNotFoundError:
-            print(f"The file '{cfg.filename}' was not found in the same directory as the script.")
-            logger.warning(f"\nThe file '{cfg.filename}' was not found in the same directory as the script.")
-            await asyncio.sleep(60)
+            print(
+                f"The file '{cfg.jsonfile}' was not found in the same directory as the script."
+            )
+            logger.warning(
+                f"\nThe file '{cfg.jsonfile}' was not found in the same directory as the script."
+            )
             pass
+        await asyncio.sleep(60)
+
 
 if __name__ == "__main__":
 

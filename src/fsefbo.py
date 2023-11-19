@@ -33,8 +33,8 @@ logging.basicConfig(
 
 # Variables
 script_dir = Path(__file__).resolve().parent
-url1 = f"https://server.fseconomy.net/data?userkey={cfg.fseuser}&format=csv&query=fbos&search=key&readaccesskey={cfg.fsegroup1}"
-url2 = f"https://server.fseconomy.net/data?userkey={cfg.fseuser}&format=csv&query=fbos&search=key&readaccesskey={cfg.fsegroup2}"
+dataurl1 = f"https://server.fseconomy.net/data?userkey={cfg.fseuser}&format=csv&query=fbos&search=key&readaccesskey={cfg.fsegroup1}"
+dataurl2 = f"https://server.fseconomy.net/data?userkey={cfg.fseuser}&format=csv&query=fbos&search=key&readaccesskey={cfg.fsegroup2}"
 imp_var = [
     "Airport",
     "FuelJetA",
@@ -46,7 +46,7 @@ imp_var = [
 
 # Create dataframe from CSV datafeeds
 # Main entry point
-"""def createdataframe():
+def createdataframe(url1 : str, url2 : str):
     try:
         df1 = pd.read_csv(url1)
         df2 = pd.read_csv(url2)
@@ -56,21 +56,21 @@ imp_var = [
         logger.info("\nAn error occoured fetching datafeeds")
         send_message("\nAn error occoured fetching datafeeds")
         sys.exit(1)
-    fbochecks(df)"""
+    fbochecks(df)
 
 # test dataframes using local csv files
-def createdataframe():
+"""def createdataframe():
     print(f'{script_dir}/fbos.csv')
-    df1 = pd.read_csv(f'{script_dir}/fbos.csv')[imp_var]
-    df2 = pd.read_csv(f'{script_dir}/fbos1.csv')[imp_var]
+    df1 = pd.read_csv(f'{script_dir}/tests/fbos.csv')[imp_var]
+    df2 = pd.read_csv(f'{script_dir}/tests/fbos1.csv')[imp_var]
     df = pd.concat([df1, df2], ignore_index=True)
-    fbochecks(df)
+    fbochecks(df)"""
 
 
 # Send output to JSON for companion discord bot
     # Output to JSON for bot
 def send_message(content):
-    file_path = script_dir / cfg.filename
+    file_path = script_dir / cfg.jsonfile
     if os.path.exists(file_path):
         
         if os.stat(file_path).st_size == 0:
@@ -147,4 +147,4 @@ def fbochecks(df):
 
 
 if __name__ == "__main__":
-    createdataframe()
+    createdataframe(dataurl1, dataurl2)
