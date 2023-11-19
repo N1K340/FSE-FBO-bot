@@ -2,6 +2,7 @@
 Simple python script to check supplies and fuel requirements for FBO holdings
 
 **Script functions:**
+
 fsefbo.py:
 - Check FBO has more than X days of supplies on hand
 - Check FBO which sells JetA has minimum amount on hand (Fuel price > $1)
@@ -16,10 +17,12 @@ discordbot.py:
 - Output logs to '../logs/discordbot.log
 
 **Useage**
+
 Using crontab or similar, set discorbot.py to run on reeboot and schedule fsefbo.py to run once or twice per day.
 FSE Datafeeds are limited to 10 polls in 60 seconds, and 40 polls in 6 hours. There is limited value in increasing the fsefbo.py script to run beyond a couple of times a day.
 
 **Setup**
+
 The following items are required to be set in the 'fsefboconfig' file using a text editor:
 
 *token*
