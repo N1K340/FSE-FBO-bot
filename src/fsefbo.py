@@ -2,24 +2,32 @@
 
 """
 Python script to monitor FSE FBO operations
+
 - Check FBO has more than X days of supplies on hand
 - Check FBO which sells JetA has minimum amount on hand (Fuel price > $1)
 - Check FBO which sells Avgas has minimum amount on hand (Fuel price > $1)
 - Output results to JSON for a discord bot to disseminate
 - Output results to '../logs/fsefbo.log'
 
+v1.1
+- Output results as a discord embeded webhook
+- Refactored code
+
 Configuration required in file 'fsefboconfig.py'
 
 """
 
+import logging
+import os
+import sys
 
 import pandas as pd
-import logging
-import json
-import sys
-import os
-import fsefboconfig as cfg
+
+from discord import SyncWebhook, Embed
 from pathlib import Path
+
+from fsefboconfigreal import fbohook_url, supplies_threshold, jet_threshold, avgas_threshold, fseuser, fsegroup1, fsegroup2
+
 
 # setup the logger
 logger = logging.getLogger(__name__)
@@ -31,22 +39,22 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# Variables
-script_dir = Path(__file__).resolve().parent
-dataurl1 = f"https://server.fseconomy.net/data?userkey={cfg.fseuser}&format=csv&query=fbos&search=key&readaccesskey={cfg.fsegroup1}"
-dataurl2 = f"https://server.fseconomy.net/data?userkey={cfg.fseuser}&format=csv&query=fbos&search=key&readaccesskey={cfg.fsegroup2}"
-imp_var = [
-    "Airport",
-    "FuelJetA",
-    "PriceJetAGal",
-    "Fuel100LL",
-    "Price100LLGal",
-    "SuppliedDays",
-]
-
 # Create dataframe from CSV datafeeds
-# Main entry point
-def createdataframe(url1 : str, url2 : str):
+def create_data_frame(url1 : str, url2 : str):
+    """Creates a dataframe from the FSE FBO by Key datafeed.
+    
+    Retreives two instances of the FSE FBO datafeeds, combines them into a single dataframe.
+
+    Args:
+        url1: The FSE datafeed URL for the first group csv table to be downloaded.
+        url2: The FSE datafeed URL for the second group csv table to be downloaded.
+    
+    Returns:
+        A single dataframe of the combined FSE datafeeds.
+
+    Raises:
+        Exception: An error occoured resulting in one or both of the FSE datafeeds not being accessed.
+    """
     try:
         df1 = pd.read_csv(url1)
         df2 = pd.read_csv(url2)
@@ -56,95 +64,161 @@ def createdataframe(url1 : str, url2 : str):
         logger.info("\nAn error occoured fetching datafeeds")
         send_message("\nAn error occoured fetching datafeeds")
         sys.exit(1)
-    fbochecks(df)
+    return df
 
 # test dataframes using local csv files
-"""def createdataframe():
-    print(f'{script_dir}/fbos.csv')
-    df1 = pd.read_csv(f'{script_dir}/tests/fbos.csv')[imp_var]
-    df2 = pd.read_csv(f'{script_dir}/tests/fbos1.csv')[imp_var]
-    df = pd.concat([df1, df2], ignore_index=True)
-    fbochecks(df)"""
-
-
-# Send output to JSON for companion discord bot
-    # Output to JSON for bot
-def send_message(content):
-    file_path = script_dir / cfg.jsonfile
-    if os.path.exists(file_path):
-        
-        if os.stat(file_path).st_size == 0:
-            logger.info("\nMessage JSON appears to be empty, creating new data structure")
-            file_data = {"notifications": [content]}
-        else:
-            with open(file_path, 'r') as file:
-                file_data = json.load(file)
-            file_data["notifications"].append(content)
-    else:
-        logger.warning("\nMessage JSON file not found, creating a new one")
-        file_data = {"notifications": [content]}
+def create_test_data_frame():
+    """Creates a test dataframe from stored csv files.
     
-    with open(file_path, 'w') as file:
-        json.dump(file_data, file)
+    Loads the two test files, fbo.csv & fbo1.csv, instead of accessing the FSE datafeed system.
+  
+    Returns:
+        A single dataframe of the combined test FSE datafeeds .csv's.
+    """
+    script_dir = Path(__file__).resolve().parent
+    print(f'{script_dir}/fbos.csv')
+    df1 = pd.read_csv(f'{script_dir}/tests/fbos.csv')
+    df2 = pd.read_csv(f'{script_dir}/tests/fbos1.csv')
+    df = pd.concat([df1, df2], ignore_index=True)
+    return df
 
-# Main checks Functions
+# Webhook output to Discord
+def send_message(title_str, message_str):
+    """Sends an embed webhook element to the designated discord server.
+    
+    Args:
+        title_str: The title to be used in the embeded discord element.
+        message_str: The description to be used in the embeded discord element.
+    """
+    webhook = SyncWebhook.from_url(fbohook_url)
+    webhook.send(embed = Embed(title = title_str, description = message_str))
 
-def fbochecks(df):
-# Check fo airport closure warning
+# Main FBO checks Functions
+
+def fbo_supply_warning(df):
+    """Checks for FBOs that might need supplies
+    
+    Checks FBO listings to isolate airports which have a supplied day value below the threshold preset in config.
+    Generates the Title and Body text for the discord message, and passes them to the send_message function.
+
+    Args:
+        df: The main dataframe of FBO listings.
+
+    Raises:
+        KeyError: An error occoured resulting in no data to sort.
+    
+    """
+    # Check for airport closure warning
     try:
-        df.loc[df["SuppliedDays"] < cfg.supplies, "Warning"] = "True"
+        df.loc[df["SuppliedDays"] < supplies_threshold, "Warning"] = "True"
     except KeyError:
         print("error getting datafeed")
         logger.info("\nAn error occoured fetching datafeeds")
         send_message("\nAn error occoured fetching datafeeds")
         sys.exit(1)
 
-    # Check for Fuel Resupply
-    df.loc[df["FuelJetA"] < cfg.jet, "OrderJet"] = "True"
-    df.loc[df["Fuel100LL"] < cfg.avgas, "OrderAvgas"] = "True"
-
-    # Filter out airports with intentional zero fuel
-    df.loc[df["PriceJetAGal"] == 0, "OrderJet"] = ""
-    df.loc[df["Price100LLGal"] == 0, "OrderAvgas"] = ""
-
-    # filter into warnings
     airport_warning = df.loc[df["Warning"] == "True"]
     airport_warning.shape
-    jeta_resupply = df.loc[df["OrderJet"] == "True"]
-    jeta_resupply.shape
-    avgas_resupply = df.loc[df["OrderAvgas"] == "True"]
-    avgas_resupply.shape
-
-    # Airport Warnings Message
     if airport_warning.empty:
+        title_str = "FSE FBO Update"
         message_str = "No Airport Supply Warnings"
     else:
+        title_str = "FSE FBO Update"
         message_str = "Airports with supply warnings:\n {}".format(
             airport_warning[["Airport", "SuppliedDays"]].to_string(index=False)
         )
     logger.info("\n{}".format(message_str))
-    send_message(message_str)
+    send_message(title_str, message_str)
 
-    # Jet A Orders
+def fbo_jetA_warning(df):
+    """Checks for FBOs that might need Jet-A Orders
+    
+    Checks FBO listings to isolate airports which have Jet-A value below the threshold preset in config.
+    Removes airports from the list which do not sell Jet-A.
+    Generates the Title and Body text for the discord message, and passes them to the send_message function.
+
+    Args:
+        df: The main dataframe of FBO listings.
+
+    Raises:
+        KeyError: An error occoured resulting in no data to sort.
+    
+    """
+    try:
+        df.loc[df["FuelJetA"] < jet_threshold, "OrderJet"] = "True"
+        df.loc[df["PriceJetAGal"] == 0, "OrderJet"] = ""
+    except KeyError:
+        print("error getting datafeed")
+        sys.exit(1)
+
+    jeta_resupply = df.loc[df["OrderJet"] == "True"]
+    jeta_resupply.shape
     if jeta_resupply.empty:
-        message_str = "No JetA Orders Requried"
+        title_str = "No JetA Orders Requried"
+        message_str = ""
     else:
-        message_str = "Airports requiring JetA Orders:\n {}".format(
+        title_str = "Airports requiring JetA Orders:"
+        message_str = "{}".format(
             jeta_resupply[["Airport", "FuelJetA"]].to_string(index=False)
         )
     logger.info("\n{}".format(message_str))
-    send_message(message_str)
+    send_message(title_str, message_str)
 
-    # Avgas Orders
+def fbo_avgas_warning(df):
+    """Checks for FBOs that might need Avgas Orders
+    
+    Checks FBO listings to isolate airports which have Avgas value below the threshold preset in config.
+    Removes airports from the list which do not sell Avgas.
+    Generates the Title and Body text for the discord message, and passes them to the send_message function.
+
+    Args:
+        df: The main dataframe of FBO listings.
+
+    Raises:
+        KeyError: An error occoured resulting in no data to sort.
+    
+    """
+    try:
+        df.loc[df["Fuel100LL"] < avgas_threshold, "OrderAvgas"] = "True"
+        df.loc[df["Price100LLGal"] == 0, "OrderAvgas"] = ""
+    except KeyError:
+        print("error getting datafeed")
+        sys.exit(1)
+
+    avgas_resupply = df.loc[df["OrderAvgas"] == "True"]
+    avgas_resupply.shape
     if avgas_resupply.empty:
-        message_str = "No Avgas Orders Required"
+        title_str = "No Avgas Orders Required"
+        message_str = ""
     else:
-        message_str = "Airports requiring Avgas Orders:\n {}".format(
+        title_str = "Airports requiring Avgas Orders:"
+        message_str = "{}".format(
             avgas_resupply[["Airport", "Fuel100LL"]].to_string(index=False)
         )
     logger.info("\n{}".format(message_str))
-    send_message(message_str)
+    send_message(title_str, message_str)
+
+def main(test: bool = False):
+    """Script entry point.
+    
+    Generates the two URL's to be used to collect the datafeed from FSE.
+    Runs the FBO Supplies, Jet-A and Avgas Warnings.   
+
+    Args:
+        test: If True will generate the datafeed from the two test .csv files. False will pull live datafeeds from FSE.
+                Defaults to False
+    """
+    dataurl1 = f"https://server.fseconomy.net/data?userkey={fseuser}&format=csv&query=fbos&search=key&readaccesskey={fsegroup1}"
+    dataurl2 = f"https://server.fseconomy.net/data?userkey={fseuser}&format=csv&query=fbos&search=key&readaccesskey={fsegroup2}"
+    if test:
+        df = create_test_data_frame()
+        print("Test mode: Using CSV data")
+    else:
+        df = create_data_frame(dataurl1, dataurl2)
+    fbo_supply_warning(df)
+    fbo_jetA_warning(df)
+    fbo_avgas_warning(df)
 
 
 if __name__ == "__main__":
-    createdataframe(dataurl1, dataurl2)
+    main()

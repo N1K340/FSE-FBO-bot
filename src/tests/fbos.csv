@@ -1,0 +1,3 @@
+FboId,Status,Airport,Name,Owner,Icao,Location,Lots,RepairShop,Gates,GatesRented,Fuel100LL,FuelJetA,BuildingMaterials,Supplies,SuppliesPerDay,SuppliedDays,SellPrice,Fuel100LLGal,FuelJetAGal,Price100LLGal,PriceJetAGal
+12345,Active,Test Fuel,Rex Roma,Top End Air(N1K),YROM,"Roma, Roma, Queensland, Australia",2,Yes,4,0,50000,50000,0,1420,40,35,0,50000,50000,3.9,3.8
+12346,Active,Test Need Fuel,Rex Mt Isa,Top End Air(N1K),YBMA,"Mt Isa, Mt Isa, Queensland, Australia",2,Yes,4,0,1000,1000,0,0,40,0,0,1000,1000,4.2,4
