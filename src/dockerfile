@@ -1,0 +1,10 @@
+FROM python:3.9-slim
+
+WORKDIR /code
+
+COPY ./app/main.py /code/main.py
+COPY ./app/config.py /code/config.py
+
+RUN pip install --no-cache-dir schedule pandas discord.py requests
+
+CMD ["python", "-u", "main.py"]
