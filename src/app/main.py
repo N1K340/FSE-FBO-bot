@@ -18,7 +18,10 @@ v2.0
 - merged multiple functions to create standalone FSE app
 - functions split out to modules
 
-Configuration required in file 'fsefboconfig.py'
+v2.1
+- Removed hard coded aircraft dictionary in favour of environment variable for easier changes
+
+Configuration required in file 'config.py'
 
 """
 
@@ -33,13 +36,14 @@ import os
 from discord import SyncWebhook, Embed
 from pathlib import Path
 
-from config import supplies_threshold, jet_threshold, avgas_threshold, aircraft
+from config import supplies_threshold, jet_threshold, avgas_threshold
 fbohook_url = os.environ.get('FBOHOOK', 'Not Set')
 mxhook_url = os.environ.get('MXHOOK', 'Not Set')
 fseuser = os.environ.get('FSEUSER', 'Not Set')
 fsegroup1 = os.environ.get('FSEGROUP1', 'Not Set')
 fsegroup2 = os.environ.get('FSEGROUP2', 'Not Set')
-
+aircraft = os.environ.get('AIRCRAFT', 'Not Set')
+bot_version = 'v2.1-b'
 
 warnings.filterwarnings("ignore")
 
@@ -292,7 +296,7 @@ def mxmain():
 
 # Task scheduling - Times in UTC for Docker
 def run_check():
-    print(f'{datetime.datetime.now()} fse-bot still running')
+    print(f'{datetime.datetime.now()} fse-bot still running {bot_version}')
 
 schedule.every().day.at("20:00").do(main_fbo)
 schedule.every().day.at("09:00").do(main_fbo)
@@ -300,7 +304,7 @@ schedule.every().day.at("20:00").do(mxmain)
 schedule.every().hour.at(":00").do(run_check)
 
 if __name__ == "__main__":
-    print('Starting FSE-Bot Schedule')
+    print(f'Starting FSE-Bot Schedule {bot_version}')
     while True:
         schedule.run_pending()
         time.sleep(1)
