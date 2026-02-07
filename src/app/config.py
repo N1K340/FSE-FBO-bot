@@ -2,7 +2,3 @@
 supplies_threshold = 5  # Days
 jet_threshold = 5000  # kg
 avgas_threshold = 2000  # kg
-
-# Aircraft Dictionary for Monthly
-# aircraft = {'A62-001':700, 'N9405T':1000}
-aircraft = os.environ.get('AIRCRAFT', 'Not Set')
