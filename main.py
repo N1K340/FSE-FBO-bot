@@ -190,6 +190,8 @@ def run_heartbeat():
 
 # Task scheduling - Times in UTC for Docker
 schedule.every().hour.at(":00").do(run_heartbeat)
+schedule.every().day.at("20:00").do(daily_fbo_check)
+schedule.every().day.at("09:00").do(daily_fbo_check)
 
 if __name__ == "__main__":
     print(f'Starting FSE-Bot Schedule {__version__}')
