@@ -1,0 +1,9 @@
+FboId,Status,Airport,Name,Owner,Icao,Location,Lots,RepairShop,Gates,GatesRented,Fuel100LL,FuelJetA,BuildingMaterials,Supplies,SuppliesPerDay,SuppliedDays,SellPrice,Fuel100LLGal,FuelJetAGal,Price100LLGal,PriceJetAGal
+2648,Active,Cloncurry,Gulf Air Charter,Gulf Air Charter(N1K),YCCY,"Cloncurry, Cloncurry, Queensland, Australia",1,Yes,2,0,21040,0,0,10,20,2,0,7829,0,0,0
+16627,Active,Mt Isa,Gulf Air Charter,Gulf Air Charter(N1K),YBMA,"Mt Isa, Mt Isa, Queensland, Australia",2,Yes,4,0,10,11469,0,5200,40,130,0,10,4267,4.2,4
+27880,Active,Century Mine,Century Mine Airport,Gulf Air Charter(N1K),YCNY,"Century Mine, Century Mine, Queensland, Australia",2,Yes,4,0,17634,10,0,8520,40,213,0,6561,10,4,4.2
+28094,Active,Normanton,Gulf Air Charter,Gulf Air Charter(N1K),YNTN,"Normanton, Normanton, Queensland, Australia",2,Yes,4,0,3134,13196,0,5200,40,130,0,1166,4910,4.2,4
+31877,Active,Mornington I.,Gulf Air Charter,Gulf Air Charter(N1K),YMTI,"Mornington I., Mornington I, Queensland, Australia",2,Yes,4,0,4639,0,0,5200,40,130,0,1726,0,4.5,0
+32380,Active,Doomadgee,Gulf Air Charter,Gulf Air Charter(N1K),YDMG,"Doomadgee, Doomadgee, Queensland, Australia",2,Yes,4,0,3098,9671,0,5200,40,130,0,1152,3598,4.2,4
+32593,Active,The Monument,Phosphate Hill Mine,Gulf Air Charter(N1K),YTMO,"The Monument, The Monument, Queensland, Australia",2,Yes,4,0,8070,10862,0,5220,40,130,0,3002,4041,4.2,4
+34660,Active,Mcarthur River Mine,McArthur River Mine,Gulf Air Charter(N1K),YMHU,"Mcarthur River Mine, Mcarthur River Mine, Northern Territory, Australia",2,Yes,4,0,5121,11960,0,5200,40,130,0,1905,4450,4.2,4

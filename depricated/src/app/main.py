@@ -300,7 +300,7 @@ def run_check():
 
 schedule.every().day.at("20:00").do(main_fbo)
 schedule.every().day.at("09:00").do(main_fbo)
-schedule.every().day.at("20:00").do(mxmain)
+schedule.every().day.at("00:00").do(mxmain)
 schedule.every().hour.at(":00").do(run_check)
 
 if __name__ == "__main__":
