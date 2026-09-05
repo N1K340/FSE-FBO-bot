@@ -194,11 +194,14 @@ schedule.every().day.at("20:00").do(daily_fbo_check)
 schedule.every().day.at("09:00").do(daily_fbo_check)
 
 if __name__ == "__main__":
-    print(f'Starting FSE-Bot Schedule {__version__}')
-    if settings.TEST_MODE:
-        print(f'TEST MODE ENABLED')
-    daily_fbo_check(settings.TEST_MODE)
-    run_mx_monthly(settings.TEST_MODE)
-#    while True:
-#        schedule.run_pending()
-#        time.sleep(1)
+    if not settings.TEST_MODE:
+        print(f'Starting FSE-Bot Schedule {__version__}')
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    else:
+        print(f'Starting FSE-Bot Schedule {__version__}')
+        if settings.TEST_MODE:
+            print(f'TEST MODE ENABLED')
+        daily_fbo_check(settings.TEST_MODE)
+        run_mx_monthly(settings.TEST_MODE)
