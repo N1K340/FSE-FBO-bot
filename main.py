@@ -196,7 +196,7 @@ schedule.every().day.at("09:00").do(daily_fbo_check)
 if __name__ == "__main__":
     if not settings.TEST_MODE:
         print(f'Starting FSE-Bot Schedule {__version__}')
-        fse_api.test_all_credentials
+        fse_api.test_all_credentials()
         run_heartbeat()
         while True:
             schedule.run_pending()
