@@ -4,9 +4,10 @@ import re
 import sys
 import requests
 import pandas as pd
+import xml.etree.ElementTree as ET
+
 from pathlib import Path
 from typing import Optional
-
 from fse_pipeline.config import settings
 
 TEST_DATA_DIR = Path(__file__).parent.parent / "tests" / "test_data"
@@ -119,6 +120,19 @@ def login_fse_session(session: requests.Session, username: Optional[str] = None,
     print("🔐 Authenticating FSE session...")
     try:
         response = session.post(BASE_URL, data=login_payload, timeout=10)
+        res_text = response.text
+
+        error_match = re.search(
+            r'<div\s+class=["\']content error["\']>\s*"?([^<"\n]+)"?',
+            res_text,
+            re.IGNORECASE,
+        )
+
+        if error_match:
+            clean_msg = error_match.group(1).strip()
+            print(f"❌ Transfer failed [FSE Error]: {clean_msg}")
+            return False
+        
         if "Log out" not in response.text:
             print("❌ Login failed: Invalid credentials or session rejected.")
             return False
@@ -188,3 +202,78 @@ def send_fse_bank_transfer(
     except Exception as e:
         print(f"❌ Error sending bank transfer request: {e}")
         return False
+
+# API and Login Validation checks
+class FSEAPIError(Exception):
+    """Raised when FSE API credentials or queries are invalid."""
+    pass
+
+def _check_single_key_pair(user_key: str, group_key: str, label: str) -> None:
+    """Helper to query FSE XML endpoint and raise FSE's exact error message on failure."""
+    if not group_key:
+        raise FSEAPIError(f"Configuration Error: {label} is missing from environment variables.")
+
+    url = (
+        f"https://server.fseconomy.net/data"
+        f"?userkey={user_key}"
+        f"&format=xml"
+        f"&query=statistics"
+        f"&search=key"
+        f"&readaccesskey={group_key}"
+    )
+
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+
+        root = ET.fromstring(response.text.strip())
+
+        # If FSE returns an <Error> node, extract and raise its exact text
+        if root.tag == "Error":
+            fse_message = root.text.strip() if root.text else "Unknown FSE error"
+            raise FSEAPIError(f"Validation failed {label} : {fse_message}")
+
+    except ET.ParseError:
+        raise FSEAPIError(f"Received malformed XML response while testing {label}.")
+    except requests.RequestException as e:
+        raise FSEAPIError(f"Network error while validating {label}: {e}")
+
+def validate_all_credentials(user_key: str, group_key_1: str, group_key_2: str, username: str, password: str) -> bool:
+    """Validates USER_KEY against both GROUP_KEY_1 and GROUP_KEY_2 on startup."""
+    print("Validating FSE API keys against FSEconomy...")
+
+    errors = []
+
+    if not user_key:
+        errors.append("Configuration Error: FSE_USER_KEY is missing from environment variables.")
+
+    # Run check for Group 1
+    err1 = _check_single_key_pair(user_key, group_key_1, "Group 1 Key")
+    if err1:
+        errors.append(err1)
+    
+    # Run check for Group 2
+    err2 = _check_single_key_pair(user_key, group_key_2, "Group 2 Key")
+    if err2:
+        errors.append(err2)
+
+    if errors:
+        error_summary = "\n  - ".join(errors)
+        raise FSEAPIError(f"Validation failed for the following key(s):\n  - {error_summary}")
+
+    print("All API keys validated successfully!")
+    print('Attempting to create logged in session')
+
+    session = requests.Session()
+    login_fse_session(session, username, password)
+    logout_fse_session(session)
+
+    return True
+
+def test_all_credentials():
+    try:
+        validate_all_credentials(settings.fse_user_key, settings.fsegroup1, settings.fsegroup2, settings.fse_username, settings.fsepassword)
+    except FSEAPIError as err:
+        print(f"CRITICAL STARTUP FAILURE:\n{err}")
+        return
+
