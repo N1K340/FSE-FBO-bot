@@ -32,6 +32,7 @@ This application is designed to run in a Docker container (e.g., via Docker Comp
 
 Set the following variables in your `.env` file or container environment:
 
+```bash
 # ==========================================
 # FSE-FBO-Bot Environment Configuration
 # ==========================================
@@ -47,8 +48,8 @@ FSEGROUP1=""  # Primary FBO Group Access Key
 FSEGROUP2=""  # Secondary/Aircraft Group Access Key
 
 # Discord Webhooks
-FBOHOOK="https://discord.com/api/webhooks/YOUR/FBO/HOOK"
-MXHOOK="https://discord.com/api/webhooks/YOUR/MX/HOOK"
+FBOHOOK="[https://discord.com/api/webhooks/YOUR/FBO/HOOK](https://discord.com/api/webhooks/YOUR/FBO/HOOK)"
+MXHOOK="[https://discord.com/api/webhooks/YOUR/MX/HOOK](https://discord.com/api/webhooks/YOUR/MX/HOOK)"
 
 # Transfer Accounts (Numerical FSE Account IDs)
 PERSONAL_ACC_ID=""       # Numerical Personal Account ID
@@ -63,9 +64,9 @@ MONTHLY_BUFFER=10000.00  # Must be in xxx.xx format with two decimals
 # Overrides & Aircraft Configuration (Python Dictionary Syntax formatted as String)
 AIRCRAFT="{'A62-001':700, 'VH-NUO':1000, 'VH-FCZ':115}"
 FBO_OVERRIDES="{'YBMA': {'jet': '40ft', 'avgas': '20ft'}}"
+```
 
 API keys can be generated on the [FSEconomy Datafeeds page](https://server.fseconomy.net/datafeeds.jsp).
-
 
 ## Docker Compose Example
 
