@@ -1,0 +1,7 @@
+# pyproject.toml
+[project]
+name = "fse_pipeline"
+version = "3.0.dev1"
+
+[tool.setuptools.packages.find]
+include = ["fse_pipeline"]  # <-- Forces it to only discover this folder

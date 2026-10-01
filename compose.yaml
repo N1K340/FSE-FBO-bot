@@ -1,0 +1,8 @@
+services:
+  fse_bot:
+    build: https://github.com/N1K340/FSE-FBO-bot.git#v3-refactor
+    container_name: fse-fbo-bot-dev
+    restart: unless-stopped
+    env_file:
+      - .env
+networks: {}

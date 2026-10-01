@@ -1,0 +1,6 @@
+SerialNumber,MakeModel,Registration,Owner,Location,LocationName,Home,SalePrice,SellbackPrice,Equipment,RentalDry,RentalWet,RentalType,Bonus,RentalTime,RentedBy,PctFuel,NeedsRepair,AirframeTime,EngineTime,TimeLast100hr,LeasedFrom,MonthlyFee,FeeOwed,RentalRepair,
+56646,Cessna 414A Chancellor,VH-FCZ,Nikolage Aircraft Holdings (N1K),YBMA,"Mt Isa, Mt Isa, Queensland, Australia",YBMA,0.00,376220.00,IFR/AP/GPS,0.00,0.00,hour,0.00,25200,Not rented.,0.29,0,194:10,194:10,01:02,NA,3762.00,0.00,1,
+47139,Curtiss P-40C (A2A),VH-ZCA,Nikolage Aircraft Holdings (N1K),YBBN,"Brisbane Intl, Brisbane, Queensland, Australia",YRED,0.00,44069.00,VFR/AP,0.00,0.00,hour,0.00,7200,Not rented.,0.00,0,06:24,06:24,06:24,NA,441.00,0.00,1,
+45262,Lockheed C-130 (Generic),VH-NUO,Nikolage Aircraft Holdings (N1K),YBMA,"Mt Isa, Mt Isa, Queensland, Australia",YBMA,0.00,2625607.00,IFR/AP/GPS,0.00,0.00,hour,0.00,18000,Not rented.,0.08,0,1415:30,1415:30,21:33,NA,26256.00,0.00,1,
+45280,Lockheed C-130 (Generic),A62-001,Nikolage Aircraft Holdings (N1K),YSSY,"Kingsford Smith Intl, Sydney, New South Wales, Australia",YSCB,0.00,2894894.00,IFR/AP/GPS,0.00,0.00,hour,0.00,18000,Not rented.,0.10,0,769:39,769:39,62:24,NA,28949.00,0.00,1,
+
