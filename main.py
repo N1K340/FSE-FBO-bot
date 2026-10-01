@@ -93,7 +93,7 @@ def run_mx_monthly(test: bool = False):
     buffer_cost = settings.monthly_buffer
     total_obligations = total_lease_cost + monthly_ac_costs + buffer_cost
 
-    # Step 3: Verify Account B balance and execute cash transfers
+    # Step 3: Verify Aircraft Holding Account balance and execute cash transfers
     stats_df = fse_api.fetch_statistics_by_key(test=test, target_acc=settings.fsegroup2)
     aircraft_account_balance = analytics.get_account_balance(stats_df)
 
@@ -102,14 +102,14 @@ def run_mx_monthly(test: bool = False):
     transfer_notes = ""
 
     try:
-        # 3a. Check if Account B needs funds from Account A
+        # 3a. Check if Aircraft Holding Account needs funds from User Account
         if aircraft_account_balance < total_obligations:
             shortfall = total_obligations - aircraft_account_balance
-            print(f"Insufficient funds in Account B. Shortfall: ${shortfall:,.2f}. Attempting transfer from Account A...")
+            print(f"Insufficient funds in Aircraft Holding Account. Shortfall: ${shortfall:,.2f}. Attempting transfer from User Account...")
 
             if not fse_api.login_fse_session(session):
                 transfer_status = "Failed"
-                transfer_notes = "Failed to authenticate web session for Account A -> Account B transfer."
+                transfer_notes = "Failed to authenticate web session for User Account -> Aircraft Holding Account transfer."
                 embed = reporters.build_monthly_mx_embed(
                     aircraft_summary, month, year, monthly_ac_costs, buffer_cost, aircraft_account_balance, transfer_status, transfer_notes, test=test
                 )
@@ -128,22 +128,22 @@ def run_mx_monthly(test: bool = False):
 
             if not transfer_a_to_b:
                 transfer_status = "Failed"
-                transfer_notes = f"Transfer of ${shortfall:,.2f} from Account A to Account B failed."
+                transfer_notes = f"Transfer of ${shortfall:,.2f} from User Account to Aircraft Holding Account failed."
                 embed = reporters.build_monthly_mx_embed(
                     aircraft_summary, month, year, monthly_ac_costs, buffer_cost, aircraft_account_balance, transfer_status, transfer_notes, test=test
                 )
                 notifications.send_mx_embed(embed)
                 return
 
-            transfer_notes += f"Transferred ${shortfall:,.2f} from Account A to Account B. "
+            transfer_notes += f"Transferred ${shortfall:,.2f} from User Account to Aircraft Holding Account. "
             aircraft_account_balance += shortfall
 
-        # 3b. Transfer lease fees from Account B to Account C
+        # 3b. Transfer lease fees from Aircraft Holding Account to Maintenance Fund
         if total_lease_cost > 0:
             if not session.headers.get("Referer"):
                 if not fse_api.login_fse_session(session):
                     transfer_status = "Failed"
-                    transfer_notes += "Failed to authenticate web session for Account B -> Account C lease transfer."
+                    transfer_notes += "Failed to authenticate web session for Aircraft Holding Account -> Maintenance Fund lease transfer."
                     embed = reporters.build_monthly_mx_embed(
                         aircraft_summary, month, year, monthly_ac_costs, buffer_cost, aircraft_account_balance, transfer_status, transfer_notes, test=test
                     )
@@ -162,7 +162,7 @@ def run_mx_monthly(test: bool = False):
 
             if not transfer_b_to_c:
                 transfer_status = "Failed"
-                transfer_notes += f"Transfer of ${total_lease_cost:,.2f} lease fees from Account B to Account C failed."
+                transfer_notes += f"Transfer of ${total_lease_cost:,.2f} lease fees from Aircraft Holding Account to Maintenance Fund failed."
                 embed = reporters.build_monthly_mx_embed(
                     aircraft_summary, month, year, monthly_ac_costs, buffer_cost, aircraft_account_balance, transfer_status, transfer_notes, test=test
                 )
@@ -170,7 +170,7 @@ def run_mx_monthly(test: bool = False):
                 return
             
             aircraft_account_balance -= total_lease_cost if not test else 1.00
-            transfer_notes += f"Transferred ${total_lease_cost:,.2f} lease fees from Account B to Account C."
+            transfer_notes += f"Transferred ${total_lease_cost:,.2f} lease fees from Aircraft Holding Account to Maintenance Fund."
 
     finally:
         fse_api.logout_fse_session(session)
@@ -181,7 +181,7 @@ def run_mx_monthly(test: bool = False):
 
     if test:
         print(f"Test Mode Embed output:\nTitle: {embed.title}\nFields: {embed.fields}")
-    
+    print(f"Embed output:\nTitle: {embed.title}\nFields: {embed.fields}")
     notifications.send_mx_embed(embed)
 
 def run_heartbeat():
@@ -191,7 +191,7 @@ def run_heartbeat():
 # Task scheduling - Times in UTC for Docker
 schedule.every().hour.at(":00").do(run_heartbeat)
 schedule.every().day.at("20:00").do(daily_fbo_check)
-schedule.every().day.at("09:00").do(daily_fbo_check)
+schedule.every().day.at("20:00").do(run_mx_monthly)
 
 if __name__ == "__main__":
     if not settings.TEST_MODE:

@@ -72,7 +72,7 @@ def fetch_aircraft_by_key(test: bool = False) -> pd.DataFrame:
 
     url = (
         f"https://server.fseconomy.net/data?userkey={settings.fse_user_key}"
-        f"&format=csv&query=aircraft&search=key&readaccesskey={settings.fsegroup1}"
+        f"&format=csv&query=aircraft&search=key&readaccesskey={settings.fsegroup2}"
     )
     try:
         return pd.read_csv(url)
@@ -276,4 +276,3 @@ def test_all_credentials():
     except FSEAPIError as err:
         print(f"CRITICAL STARTUP FAILURE:\n{err}")
         return
-
