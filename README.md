@@ -82,6 +82,11 @@ services:
 
 ## Changelog
 
+### [3.0.1] - 2026-11-10
+
+#### Fixed
+- Adjusted monthly MX schedule check to run on the last day of the month in UTC, resolving time zone offset drift for local morning execution (Closes #16).
+
 ### [3.0.0] - 2026-10-02
 
 #### Added
