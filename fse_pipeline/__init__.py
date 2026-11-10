@@ -1,2 +1,2 @@
 # fse_pipeline/__init__.py
-__version__ = "v3.0"
+__version__ = "v3.0.1"
