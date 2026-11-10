@@ -65,8 +65,10 @@ def daily_fbo_check(test: bool = False):
 
 def run_mx_monthly(test: bool = False):
     """Runs month-end operations checks for aircraft maintenance/lease and executes financial transfers."""
-    if not test and datetime.date.today().day != 1:
-        print("Skipping monthly MX check (only runs on the 1st of the month).")
+    # check if tomorrow is the first and therefore we are on the last day of the month
+    is_last_day_of_month = (datetime.date.today() + datetime.timedelta(days=1)) == 1
+    if not test and not is_last_day_of_month:
+        print("Skipping monthly MX check, it is not the last day of the month.")
         return
 
     print("Running Monthly Aircraft Lease & Transfer Pipeline...")
